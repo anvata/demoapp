@@ -1,0 +1,34 @@
+
+#1F75FE
+
+
+ const myNewTheme: BrandVariants = { 
+  10: "#020209",
+  20: "#0A1633",
+  30: "#002359",
+  40: "#002E71",
+  50: "#003A89",
+  60: "#0046A3",
+  70: "#0053BD",
+  80: "#0060D8",
+  90: "#006DF3",
+  100: "#367AFF",
+  110: "#5E88FF",
+  120: "#7A97FF",
+  130: "#92A6FF",
+  140: "#A8B5FF",
+  150: "#BCC5FF",
+  160: "#CFD5FF"
+};
+
+ const lightTheme: Theme = {
+   ...createLightTheme(myNewTheme), 
+  colorBrandForeground1: myNewTheme[90]
+};
+
+ const darkTheme: Theme = {
+   ...createDarkTheme(myNewTheme), 
+};
+
+ darkTheme.colorBrandForeground1 = myNewTheme[110]; // use brand[110] instead of brand[100]
+ darkTheme.colorBrandForeground2 = myNewTheme[120]; 
