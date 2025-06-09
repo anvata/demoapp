@@ -1,0 +1,42 @@
+// src/App.tsx
+import React from 'react';
+import { AppThemeProvider, useAppTheme } from './theme/ThemeContext';
+import { Button } from '@fluentui/react-components';
+
+const ThemeToggleButton = () => {
+  const { mode, toggleTheme } = useAppTheme();
+
+  return (
+    <Button onClick={toggleTheme}>
+      Switch to {mode === 'light' ? 'dark' : 'light'} mode
+    </Button>
+  );
+};
+
+const AppContent = () => {
+  const { theme } = useAppTheme();
+
+  return (
+    <div
+      style={{
+        padding: '2rem',
+        boxShadow: theme.customTokens?.cardShadow,
+        transition: 'all 0.3s ease',
+      }}
+    >
+      <h1>Themed Card</h1>
+      <p>This block uses custom theme tokens.</p>
+      <ThemeToggleButton />
+    </div>
+  );
+};
+
+const App = () => {
+  return (
+    <AppThemeProvider>
+      <AppContent />
+    </AppThemeProvider>
+  );
+};
+
+export default App;
