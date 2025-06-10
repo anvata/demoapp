@@ -1,17 +1,59 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-export function useFullScreen(ref: React.RefObject<HTMLElement>) {
-  const [isFullScreen, setIsFullScreen] = useState(false);
+export function useDocumentFullScreen() {
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(
+    !!document.fullscreenElement
+  );
 
-  const toggleFullScreen = () => {
-    if (!document.fullscreenElement && ref.current) {
-      ref.current.requestFullscreen?.();
-      setIsFullScreen(true);
-    } else {
-      document.exitFullscreen?.();
-      setIsFullScreen(false);
+  const enterFullScreen = useCallback(() => {
+    const docEl = document.documentElement;
+
+    const requestFullScreen =
+      docEl.requestFullscreen ||
+      (docEl as any).webkitRequestFullscreen ||
+      (docEl as any).mozRequestFullScreen ||
+      (docEl as any).msRequestFullscreen;
+
+    if (requestFullScreen) {
+      requestFullScreen.call(docEl);
     }
-  };
+  }, []);
 
-  return { isFullScreen, toggleFullScreen };
+  const exitFullScreen = useCallback(() => {
+    const exit =
+      document.exitFullscreen ||
+      (document as any).webkitExitFullscreen ||
+      (document as any).mozCancelFullScreen ||
+      (document as any).msExitFullscreen;
+
+    if (exit) {
+      exit.call(document);
+    }
+  }, []);
+
+  const toggleFullScreen = useCallback(() => {
+    if (document.fullscreenElement) {
+      exitFullScreen();
+    } else {
+      enterFullScreen();
+    }
+  }, [enterFullScreen, exitFullScreen]);
+
+  useEffect(() => {
+    const handleChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleChange);
+    };
+  }, []);
+
+  return {
+    isFullScreen,
+    enterFullScreen,
+    exitFullScreen,
+    toggleFullScreen,
+  };
 }
