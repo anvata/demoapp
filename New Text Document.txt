@@ -1,72 +1,17 @@
-// src/theme/ThemeContext.tsx
-import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
-import {
-  FluentProvider,
-  webLightTheme,
-  webDarkTheme,
-  Theme,
-} from '@fluentui/react-components';
+import { useState } from 'react';
 
-// Optional: your extended theme interface
-export interface CustomTheme extends Theme {
-  customTokens?: {
-    cardShadow?: string;
-    elevation?: string;
-  };
-}
+export function useFullScreen(ref: React.RefObject<HTMLElement>) {
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
-const customLightTheme: CustomTheme = {
-  ...webLightTheme,
-  customTokens: {
-    cardShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-    elevation: '8px',
-  },
-};
-
-const customDarkTheme: CustomTheme = {
-  ...webDarkTheme,
-  customTokens: {
-    cardShadow: '0 2px 6px rgba(255, 255, 255, 0.1)',
-    elevation: '4px',
-  },
-};
-
-type ThemeMode = 'light' | 'dark';
-
-interface ThemeContextValue {
-  theme: CustomTheme;
-  mode: ThemeMode;
-  toggleTheme: () => void;
-}
-
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
-
-export const useAppTheme = () => {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error('useAppTheme must be used within ThemeProvider');
-  return ctx;
-};
-
-export const AppThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mode, setMode] = useState<ThemeMode>(() => {
-    return (localStorage.getItem('app-theme') as ThemeMode) || 'light';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('app-theme', mode);
-  }, [mode]);
-
-  const theme = useMemo(() => (mode === 'light' ? customLightTheme : customDarkTheme), [mode]);
-
-  const toggleTheme = () => {
-    setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement && ref.current) {
+      ref.current.requestFullscreen?.();
+      setIsFullScreen(true);
+    } else {
+      document.exitFullscreen?.();
+      setIsFullScreen(false);
+    }
   };
 
-  return (
-    <ThemeContext.Provider value={{ theme, mode, toggleTheme }}>
-      <FluentProvider theme={theme} style={{ height: '100vh' }}>
-        {children}
-      </FluentProvider>
-    </ThemeContext.Provider>
-  );
-};
+  return { isFullScreen, toggleFullScreen };
+}
