@@ -37,3 +37,22 @@ const sdmlThemePurple: BrandVariants = {
   // 160: '#db4f2',
 
 };
+
+const sdmlThemePurplenew : BrandVariants = {
+  10: '#2a1249',
+  20: '#381861',
+  30: '#461e79',
+  40: '#532391',
+  50: '#6129a9',
+  60: '#6f2fc2',
+  70: '#7d35da',
+  80: '#8b3bf2',
+  90: '#974ff3',
+  100: '#a262f5',
+  110: '#ae76f6',
+  120: '#ae76f6',
+  130: '#b989f7',
+  140: '#c59df9',
+  150: '#d1b1fa',
+  160: '#dcc4fb',
+};
