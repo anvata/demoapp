@@ -1,0 +1,37 @@
+type LoadingState = "idle" | "loading" | "loaded" | "failed";
+
+export function useDataSource<TFn extends (...args: any[]) => Promise<any>>(
+  apiFn: TFn,
+  options?: { autoFetch?: boolean; defaultArgs?: Parameters<TFn> }
+) {
+  type TData = Awaited<ReturnType<TFn>>;   // infer data type from API
+  type TArgs = Parameters<TFn>;            // infer args tuple from API
+
+  const [data, setData] = React.useState<TData | null>(null);
+  const [loadingState, setLoadingState] = React.useState<LoadingState>("idle");
+  const [error, setError] = React.useState<string | null>(null);
+
+  const fetchData = React.useCallback(
+    async (...args: TArgs) => {
+      setLoadingState("loading");
+      setError(null);
+      try {
+        const result = await apiFn(...args);
+        setData(result);
+        setLoadingState("loaded");
+      } catch (err: any) {
+        setError(err.message ?? "Unknown error");
+        setLoadingState("failed");
+      }
+    },
+    [apiFn]
+  );
+
+  React.useEffect(() => {
+    if (options?.autoFetch && options.defaultArgs) {
+      fetchData(...options.defaultArgs);
+    }
+  }, [options?.autoFetch, options?.defaultArgs, fetchData]);
+
+  return { data, loadingState, error, fetchData };
+}
