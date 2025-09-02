@@ -1,0 +1,4 @@
+Justification:
+The cross-spawn package is flagged due to CVE-2024-21538. In this project, cross-spawn is used only as a transitive dev dependency of webpack-cli, ESLint, and Storybook.
+It is not included in the production React build (browser bundle) and therefore not exploitable at runtime. We have pinned cross-spawn to ^7.0.5 via overrides to ensure a patched version is used in dev tooling.
+This is a false positive for the production application.
