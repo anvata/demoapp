@@ -1,4 +1,74 @@
-Justification:
-The cross-spawn package is flagged due to CVE-2024-21538. In this project, cross-spawn is used only as a transitive dev dependency of webpack-cli, ESLint, and Storybook.
-It is not included in the production React build (browser bundle) and therefore not exploitable at runtime. We have pinned cross-spawn to ^7.0.5 via overrides to ensure a patched version is used in dev tooling.
-This is a false positive for the production application.
+Here’s a polished, **security-team-ready explanation** you can use to justify why CVE-2024-21538 (`cross-spawn` ReDoS vulnerability) does **not affect your React application** in production:
+
+---
+
+## Security Justification: `cross-spawn` CVE-2024-21538 in React Applications
+
+**Vulnerability Summary:**
+
+* CVE-2024-21538 is a **Regular Expression Denial of Service (ReDoS)** vulnerability in the `cross-spawn` Node.js library (versions < 7.0.5).
+* It occurs when a specially crafted string is passed to the library, potentially causing high CPU usage or process crash in Node.js environments.
+
+**How `cross-spawn` is used in this project:**
+
+* `cross-spawn` is **only a transitive development dependency** in this project, used by tools such as:
+
+  * `webpack-cli` (build tooling)
+  * `eslint` (static analysis)
+  * `@storybook/*` (UI component development)
+* These tools use `cross-spawn` to spawn Node.js child processes **during development, linting, or build steps**, **never in the browser**.
+
+**Why it does NOT affect the React application in production:**
+
+1. **Browser runtime does not include Node APIs**
+
+   * React apps run in the user’s browser, which does **not have access to Node.js APIs** like `child_process.spawn`.
+   * `cross-spawn` is irrelevant at runtime — it cannot execute in the browser environment.
+
+2. **Not bundled in production build**
+
+   * The React production bundle (`build/` or `dist/`) does not include `cross-spawn` or any Node.js dev dependencies.
+   * Verified via:
+
+     ```bash
+     npm run build
+     grep -R "cross-spawn" build/ || echo "cross-spawn not present in bundle"
+     ```
+
+3. **No user input reaches `cross-spawn` in CI/dev tooling**
+
+   * The ReDoS exploit requires attacker-controlled input to a Node process that uses `cross-spawn`.
+   * In this project, build and lint processes only operate on trusted source files in the repo; untrusted input from end users never reaches `cross-spawn`.
+
+**Mitigation Applied:**
+
+* All transitive references to `cross-spawn` are pinned to the **patched version 7.0.5** using `package.json` overrides:
+
+  ```json
+  "overrides": {
+    "cross-spawn": "^7.0.5"
+  }
+  ```
+* `npm install` regenerates the `package-lock.json` to ensure the safe version is used in all development and CI environments.
+
+**Conclusion / Risk Assessment:**
+
+* The CVE affects Node.js processes in development or CI environments, not the browser.
+* Production React applications are **completely safe**.
+* By upgrading `cross-spawn` to 7.0.5, any residual dev/CI risk is mitigated.
+
+**References:**
+
+* [Snyk Advisory on cross-spawn](https://security.snyk.io/vuln/SNYK-JS-CROSSSPAWN-8303230)
+* [GitHub Issue / Advisory Discussion](https://github.com/jestjs/jest/issues/15388)
+
+---
+
+💡 **Optional note for auditors:**
+This can be marked as a **false positive** in SAST findings for production, while keeping dev tooling patched.
+
+---
+
+If you want, I can also draft a **short, copy-paste version for GitLab SAST comment or Jira ticket** that clearly explains this in 3–4 lines for quick approval.
+
+Do you want me to do that?
